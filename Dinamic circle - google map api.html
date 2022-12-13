@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<!--
+ @license
+ Copyright 2019 Google LLC. All Rights Reserved.
+ SPDX-License-Identifier: Apache-2.0
+-->
+<html>
+  <head>
+    <title>Simple Map</title>
+    <script
+  src="https://code.jquery.com/jquery-3.6.1.min.js"
+  integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+  crossorigin="anonymous"></script>
+    <style> 
+    html,
+    body {
+         height: 100%;
+         margin: 0;
+         padding: 0;
+         font-family: Arial, Helvetica, sans-serif;
+         font-size: 1.4vw;
+       }
+
+       #map {
+         height: 100%;
+       }
+       #info{
+        position:fixed;
+        bottom:0;
+        left:0;
+        min-width:15vw;
+        min-height:20vh;
+        background-color:white;
+        padding:2vw 2vw;
+        z-index: 10;
+
+
+       }
+
+       </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="info">
+        <div class="range-input">
+           <input type="range" id="rangeInput" class="range-min" min="0" max="5000" step="100" value="0">
+            <span id="kilometers"></span>
+        </div>
+        <p>Lat: 42.99806<br>Lng: 21.94611</p>
+        <p>Radius: <span id="meters"></span></p>
+        <p>Area: <span id="area"></span></p>
+    </div>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly" defer></script>
+  
+
+    <script>
+
+
+        function initMap() {
+            const center = new google.maps.LatLng(42.99806, 21.94611);
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: center,   
+            });
+            let rangeInput = document.querySelectorAll(".range-input input");
+
+            
+        /* Numbers for left white widget, input collection and calculations*/
+          
+            rangeInput.forEach (input => {
+                input.addEventListener ("input", e => {
+                    let meters = parseInt (rangeInput[0].value);
+                    
+                    let kmRaw = meters/1000;
+                    let kilometers = Math.trunc( kmRaw );
+
+                    let areaRaw = (meters*meters)*3.14;
+                    let area = Math.trunc( areaRaw );
+
+                    document.getElementById("meters").innerHTML = meters + " m";
+                    document.getElementById("kilometers").innerHTML = kilometers + " km";
+                    document.getElementById("area").innerHTML = area + " m2";
+                    
+                    input.setAttribute('value', meters);
+                    });
+                
+            
+             });
+
+         
+            /*Input select*/
+            let selectElement = document.querySelector(".range-input input");
+            /*Array of Circle objects*/
+            let AllCircles = [];
+        
+            /* On every input change get value from input*/
+            selectElement.addEventListener('change', (event) => {
+            let value = parseInt(document.querySelector(".range-input input").value);
+
+            /*add property value to object*/
+            let CircleRadius = new google.maps.Circle({
+                center: new google.maps.LatLng(42.99806, 21.94611),
+                radius: value,
+                strokeColor: "orange",
+                strokeOpacity: 0.6,
+                strokeWeight:2,
+                fillColor:"orange",
+                fillOpacity: 0.2
+            });
+            
+          
+           /*Push objects with different radius value inside AllCircles array*/
+            AllCircles.push(CircleRadius);
+
+            /* loop all objects inside array and setMap to null*/
+            for(i=0;i<AllCircles.length;i++){
+                AllCircles[i].setMap(null);  
+            }
+
+            /* last created object is displayed*/
+            CircleRadius.setMap(map);
+
+            });
+            
+            
+        }
+
+    </script>
+  </body>
+</html>
